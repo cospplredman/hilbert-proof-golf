@@ -53,6 +53,8 @@ let check = (pf) => {
 						throw new Error("expected a rule");
 				}
 
+				if(deduction == null)
+					throw new Error(v.label + " is not a valid proof step");
 				lines[v.label] = deduction;
 				return;
 			}
