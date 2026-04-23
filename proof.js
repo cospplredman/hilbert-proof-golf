@@ -126,7 +126,7 @@ let Opt = (f) => Either(f, Id);
 let wspace = Both(Many(Rx(/\s/)), Del);
 
 let prop_grammar = (nxt) => {
-	let ref = all(Rx(/[A-Z]/), Many(Rx(/[A-Z]/)), PopStack(arr => PopStack(v => PushStack(Ref([v, ...arr].join(""))))));
+	let ref = all(Rx(/[^->!\s\(\[\]\)]/), Many(Rx(/[^->!\s\(\[\]\)]/)), PopStack(arr => PopStack(v => PushStack(Ref([v, ...arr].join(""))))));
 
 	let primary_expr = all(wspace, some(
 		ref,
