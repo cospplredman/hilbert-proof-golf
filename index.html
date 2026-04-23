@@ -1,0 +1,172 @@
+<!DOCTYPE hml>
+<html lang="en">
+<head>
+	<meta charset="utf8"></meta>
+	<title>Proof Golf</title>
+<script>
+
+//needed for internet explorer (apparently)
+if(document.createElement){
+	var my_elements = ['div', 'table', 'row', 'cell', 'hpart', 'vpart', 'fit', 'fill', 'hcenter', 'vcenter', 'box', 'span', 'page', 'scrollx', 'scrolly', 'scroll', 'border', 'margin'];
+
+	for(let i = 0; i < my_elements.length; i++){
+		document.createElement("c-" + my_elements[i]);
+	}
+}
+
+</script>
+<style>
+body { width: 100vw; height: 100vh; max-height: 100vh; margin: 0px; display: flex; flex-direction: column; overflow: hidden; }
+c-div { display: block; width: 100%; }
+c-box { display: inline-block; }
+c-span { display: inline; }
+c-table { display: table; }
+c-row { display: table-row; }
+c-cell { display: table-cell; }
+c-hpart { display: flex; width:100%; }
+c-vpart { display: flex; flex-direction: column; height: 100%; max-height: 100%; }
+c-hcenter { display: flex; justify-content: center; width:100%; }
+c-vcenter { display: flex; flex-direction: column; justify-content: center; height:100%; }
+c-fill { flex: 1; min-height: min-content; min-width: min-content; }
+c-hfit { flex: 1; min-height: 0px; min-width: 0px; max-width: min-content; }
+c-vfit { flex: 1; min-height: 0px; min-width: 0px; max-height: min-content; }
+c-fit { flex: 1; min-height: 0px; min-width: 0px; max-height: min-content; max-width: min-content; }
+
+c-page { display: block; 
+	break-after: page;
+	width: 8.5in; min-width: 8.5in; max-width: 8.5in;
+	height: 11in; min-height: 11in; max-height: 11in; 
+	background-color: white; overflow: hidden; }
+
+@media print {
+  @page { size: letter; margin: 0; padding: 0; }
+
+  *:not(c-page):not(:has(c-page)):not(c-page *) { max-height: 0px !important; display: none !important; }
+  *:has(c-page) {
+    border:none !important;
+    display:inline !important;
+    overflow:hidden !important;
+    height:min-content !important; } }
+
+c-scrollx { display: block; width: 100%; height: 100%; overflow-x: scroll; overflow-y: hidden; white-space: nowrap; }
+c-scrolly { display: block; width: 100%; height: 100%; overflow-x: hidden; overflow-y: scroll; }
+c-scroll { display: block; width: 100%; height: 100%; overflow: scroll; }
+c-sticky { display: block; position: sticky; width: 100%; top: 0; bottom: 0; }
+
+c-border { 
+	display: block; 
+	border: 1px solid black; 
+	inset: 1px;
+	width: CALC(100% - 2px); 
+	height: CALC(100% - 2px); 
+}
+
+c-margin {
+	display: block;
+	margin: 0.5in; 
+	inset: 0.5in; 
+	min-width: min-content;
+	min-height: min-content; }
+
+c-pre {
+	display: block;
+	font-family: "Courier New", Courier, monospace;
+	font-size: 12pt;
+	line-height: 1.2;
+	white-space: pre-wrap;
+	overflow-wrap: break-word; }
+
+c-heading {
+	display: block;
+	letter-spacing: 2px;
+	width: 100%;
+	text-align: center;
+	text-decoration: underline;
+	text-underline-offset: 2px; }
+
+
+
+textarea:focus {
+    border: 2px solid black; 
+    outline: none;           
+    background-color: white; }
+
+textarea::selection {
+    background-color: black;
+    color: white;
+}
+
+textarea::-moz-selection {
+    background-color: black;
+    color: white;
+}
+
+
+</style>
+</head>
+<body>
+<script src="check.js"></script>
+<script src="proof.js"></script>
+<!-- TODO pagination? <c-sticky><c-div><c-border>
+<c-hpart>
+	<c-fill>page1</c-fill>
+	<c-fill>page2</c-fill>
+	<c-fill>page3</c-fill>
+	<c-fill>page4</c-fill>
+
+</c-hpart>
+</c-border></c-div></c-sticky> --!>
+<c-scroll><c-margin><c-hcenter>
+
+<c-fit>
+<c-page><c-border><c-margin><c-pre>
+<c-heading>Welcome to Proof Golf!</c-heading>
+where we attempt to find the shortest hilbert style proofs for given propositions...
+
+try writing a proof!
+<textarea id="textarea" onInput="run_checker()" style="width:100%;height:50%;resize:none;">
+--this is a comment
+
+--a statement is a label (lowercase alphanumeric string followed by a colon)
+--followed by a rule (A1, A2, A3, MP followed by their arguments)
+--and terminated with a semicolon
+0: A1 [A] [A];
+1: A1 [A] [A->A];
+2: A2 [A] [A->A] [A];
+
+-- Propositions are compositions of implication (A -> B), and negation (!)
+-- A->(B->C) is the same thing as A->B->C
+
+--A1 is the A->B->A axiom
+--A2 is the (A->B->C)->(A->B)->(A->C) axiom
+--and A3 is (!A -> !B) -> (B -> A)
+
+--the arguments passed to MP are labels
+3: MP 2 1;
+
+--the last statement is the result of your proof
+4: MP 3 0;
+
+--your score is the number of statements in your proof
+</textarea>
+<c-pre id="output"></c-pre>
+
+</c-pre></c-margin></c-border></c-page>
+
+</c-fit>
+</c-hcenter></c-margin></c-scroll>
+<script>
+let run_checker = () => {
+	try{
+		let proof = parse_proof(textarea.value);
+		let result = check(proof);
+		output.innerText = `you have managed to prove:\n` + print_prop(result) + "\n\nwith a score of: " + proof.lines.length;
+	}catch(e){
+		output.innerText = e.toString();
+	}
+}
+
+run_checker()
+</script>
+</body>
+</html>
