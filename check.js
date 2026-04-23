@@ -55,7 +55,6 @@ let a2 = (a, b, c) => Derived(Arrow(Arrow(a, Arrow(b, c)), Arrow(Arrow(a, b), Ar
 let a3 = (a, b) => Derived(Arrow(Arrow(Not(a), Not(b)), Arrow(b, a)));
 let mp = (a, b) => {
 	let ap = a.prop, bp = b.prop;
-	console.log(ap, bp);
 	if(ap.type == ND.arrow && term_eq(ap.left, bp)){
 		return Derived(ap.right);
 	}

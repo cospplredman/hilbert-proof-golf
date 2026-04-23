@@ -34,7 +34,6 @@ let check = (pf) => {
 				if(lines[v.label] != null)
 					throw new Error(v.label + " already defined");
 
-				console.log(v, lines);
 				let deduction;
 				switch(v.rule.type){
 					case PF.mp:
@@ -178,7 +177,6 @@ let to_parser = (grammar) => (str) => {
 	if(parse.fail){
 		let lines = str.split("\n");
 		let col = parse.index - lines.slice(0, parse.new_lines).join("\n").length + 1; 
-		console.log(col);
 
 		throw new Error("parse failed at line " + parse.new_lines + ":\n```\n" 
 			+ lines.slice(Math.max(parse.new_lines - 1, 0), parse.new_lines + 1).join("\n") 
